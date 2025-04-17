@@ -8,14 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
+const express_1 = require("express");
 const client_1 = require("@prisma/client");
 const auth_1 = require("../middleware/auth");
-const router = express_1.default.Router();
+const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 // Get all projects (public)
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -77,7 +74,8 @@ router.get('/:slug', (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
         });
         if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+            res.status(404).json({ message: 'Project not found' });
+            return;
         }
         res.json({ project });
     }
@@ -94,7 +92,8 @@ router.post('/', auth_1.authenticate, (req, res) => __awaiter(void 0, void 0, vo
             where: { slug }
         });
         if (existingProject) {
-            return res.status(400).json({ message: 'Slug already in use' });
+            res.status(400).json({ message: 'Slug already in use' });
+            return;
         }
         const project = yield prisma.project.create({
             data: {
@@ -133,7 +132,8 @@ router.put('/:id', auth_1.authenticate, (req, res) => __awaiter(void 0, void 0, 
                 }
             });
             if (existingProject) {
-                return res.status(400).json({ message: 'Slug already in use' });
+                res.status(400).json({ message: 'Slug already in use' });
+                return;
             }
         }
         const project = yield prisma.project.update({

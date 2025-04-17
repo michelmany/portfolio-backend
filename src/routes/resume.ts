@@ -1,12 +1,12 @@
-import express from 'express';
+import {Router, Request, Response} from 'express';
 import {PrismaClient} from '@prisma/client';
 import {authenticate} from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 const prisma = new PrismaClient();
 
 // Get active resume (public)
-router.get('/active', async (req, res) => {
+router.get('/active', async (req: Request, res: Response) => {
     try {
         const resume = await prisma.resume.findFirst({
             where: {active: true},
@@ -14,7 +14,8 @@ router.get('/active', async (req, res) => {
         });
 
         if (!resume) {
-            return res.status(404).json({message: 'Resume not found'});
+            res.status(404).json({message: 'Resume not found'});
+            return;
         }
 
         res.json({resume});
@@ -24,7 +25,7 @@ router.get('/active', async (req, res) => {
 });
 
 // Get all resumes (admin only)
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req: Request, res: Response) => {
     try {
         const resumes = await prisma.resume.findMany({
             orderBy: {createdAt: 'desc'}
@@ -37,7 +38,7 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Upload new resume (admin only)
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
     try {
         const {title, fileUrl} = req.body;
 
@@ -66,7 +67,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Set resume as active (admin only)
-router.put('/:id/activate', authenticate, async (req, res) => {
+router.put('/:id/activate', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
 
@@ -91,7 +92,7 @@ router.put('/:id/activate', authenticate, async (req, res) => {
 });
 
 // Delete resume (admin only)
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
 

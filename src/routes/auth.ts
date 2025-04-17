@@ -1,14 +1,14 @@
-import express from 'express';
-import {PrismaClient} from '@prisma/client';
+import {Router, Request, Response, NextFunction} from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import {PrismaClient} from '@prisma/client';
 import {authenticate} from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 const prisma = new PrismaClient();
 
 // Register user (admin)
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: Request, res: Response) => {
     try {
         const {email, password, name} = req.body;
 
@@ -18,7 +18,8 @@ router.post('/register', async (req, res) => {
         });
 
         if (existingUser) {
-            return res.status(400).json({message: 'User already exists'});
+            res.status(400).json({message: 'User already exists'});
+            return;
         }
 
         // Hash password
@@ -36,7 +37,7 @@ router.post('/register', async (req, res) => {
         // Generate token
         const token = jwt.sign(
             {id: user.id},
-            process.env.JWT_SECRET as string,
+            process.env.JWT_SECRET || 'default-secret',
             {expiresIn: '7d'}
         );
 
@@ -55,7 +56,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
     try {
         const {email, password} = req.body;
 
@@ -65,20 +66,22 @@ router.post('/login', async (req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({message: 'Invalid credentials'});
+            res.status(400).json({message: 'Invalid credentials'});
+            return;
         }
 
         // Check password
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({message: 'Invalid credentials'});
+            res.status(400).json({message: 'Invalid credentials'});
+            return;
         }
 
         // Generate token
         const token = jwt.sign(
             {id: user.id},
-            process.env.JWT_SECRET as string,
+            process.env.JWT_SECRET || 'default-secret',
             {expiresIn: '7d'}
         );
 
@@ -97,14 +100,15 @@ router.post('/login', async (req, res) => {
 });
 
 // Get current user
-router.get('/me', authenticate, async (req: any, res) => {
+router.get('/me', authenticate, async (req: Request, res: Response) => {
     try {
         const user = await prisma.user.findUnique({
-            where: {id: req.user.id}
+            where: {id: req.user?.id}
         });
 
         if (!user) {
-            return res.status(404).json({message: 'User not found'});
+            res.status(404).json({message: 'User not found'});
+            return;
         }
 
         res.json({
@@ -122,12 +126,12 @@ router.get('/me', authenticate, async (req: any, res) => {
 });
 
 // Update user profile
-router.put('/profile', authenticate, async (req: any, res) => {
+router.put('/profile', authenticate, async (req: Request, res: Response) => {
     try {
         const {name, bio} = req.body;
 
         const updatedUser = await prisma.user.update({
-            where: {id: req.user.id},
+            where: {id: req.user?.id},
             data: {name, bio}
         });
 

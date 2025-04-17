@@ -1,12 +1,12 @@
-import express from 'express';
+import {Router, Request, Response} from 'express';
 import {PrismaClient} from '@prisma/client';
 import {authenticate} from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 const prisma = new PrismaClient();
 
 // Get all social links (public)
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
         const socialLinks = await prisma.socialLink.findMany({
             orderBy: {order: 'asc'}
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create social link (admin only)
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
     try {
         const {platform, url, icon, order} = req.body;
 
@@ -42,7 +42,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Update social link (admin only)
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
         const {platform, url, icon, order} = req.body;
@@ -67,7 +67,7 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete social link (admin only)
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
 

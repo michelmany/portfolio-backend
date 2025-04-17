@@ -1,10 +1,10 @@
-import express from 'express';
+import {Router, Request, Response} from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import {authenticate} from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
 // Set up multer storage
 const storage = multer.diskStorage({
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
         cb(null, uploadDir);
     },
-    filename: (req, file, cb) => {
+    filename: (req: Request, file, cb) => {
         // Generate unique filename
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const ext = path.extname(file.originalname);
@@ -50,10 +50,11 @@ const upload = multer({
 });
 
 // Upload file (admin only)
-router.post('/', authenticate, upload.single('file'), (req, res) => {
+router.post('/', authenticate, upload.single('file'), (req: Request, res: Response) => {
     try {
         if (!req.file) {
-            return res.status(400).json({message: 'No file uploaded'});
+            res.status(400).json({message: 'No file uploaded'});
+            return;
         }
 
         // Return the file path

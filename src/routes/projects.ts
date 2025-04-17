@@ -1,12 +1,12 @@
-import express from 'express';
+import {Router, Request, Response} from 'express';
 import {PrismaClient} from '@prisma/client';
 import {authenticate} from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 const prisma = new PrismaClient();
 
 // Get all projects (public)
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
         const projects = await prisma.project.findMany({
             include: {
@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get featured projects (public)
-router.get('/featured', async (req, res) => {
+router.get('/featured', async (req: Request, res: Response) => {
     try {
         const projects = await prisma.project.findMany({
             where: {
@@ -53,7 +53,7 @@ router.get('/featured', async (req, res) => {
 });
 
 // Get project by slug (public)
-router.get('/:slug', async (req, res) => {
+router.get('/:slug', async (req: Request, res: Response) => {
     try {
         const {slug} = req.params;
 
@@ -69,7 +69,8 @@ router.get('/:slug', async (req, res) => {
         });
 
         if (!project) {
-            return res.status(404).json({message: 'Project not found'});
+            res.status(404).json({message: 'Project not found'});
+            return;
         }
 
         res.json({project});
@@ -79,7 +80,7 @@ router.get('/:slug', async (req, res) => {
 });
 
 // Create project (admin only)
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
     try {
         const {title, slug, description, content, technologies, websiteUrl, githubUrl, featured} = req.body;
 
@@ -89,7 +90,8 @@ router.post('/', authenticate, async (req, res) => {
         });
 
         if (existingProject) {
-            return res.status(400).json({message: 'Slug already in use'});
+            res.status(400).json({message: 'Slug already in use'});
+            return;
         }
 
         const project = await prisma.project.create({
@@ -115,7 +117,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Update project (admin only)
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
         const {title, slug, description, content, technologies, websiteUrl, githubUrl, featured} = req.body;
@@ -132,7 +134,8 @@ router.put('/:id', authenticate, async (req, res) => {
             });
 
             if (existingProject) {
-                return res.status(400).json({message: 'Slug already in use'});
+                res.status(400).json({message: 'Slug already in use'});
+                return;
             }
         }
 
@@ -160,7 +163,7 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // Delete project (admin only)
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
 
@@ -175,7 +178,7 @@ router.delete('/:id', authenticate, async (req, res) => {
 });
 
 // Add image to project (admin only)
-router.post('/:id/images', authenticate, async (req, res) => {
+router.post('/:id/images', authenticate, async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
         const {url, caption, order} = req.body;
@@ -199,7 +202,7 @@ router.post('/:id/images', authenticate, async (req, res) => {
 });
 
 // Remove image from project (admin only)
-router.delete('/images/:imageId', authenticate, async (req, res) => {
+router.delete('/images/:imageId', authenticate, async (req: Request, res: Response) => {
     try {
         const {imageId} = req.params;
 
