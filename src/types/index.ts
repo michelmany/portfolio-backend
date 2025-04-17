@@ -5,7 +5,7 @@ export interface AuthenticatedRequest extends Request {
         id: string;
         email: string;
         name: string;
-        bio?: string;
-        avatar?: string;
+        bio?: string | undefined;
+        avatar?: string | undefined;
     };
 }
