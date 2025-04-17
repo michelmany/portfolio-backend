@@ -4,8 +4,8 @@ declare namespace Express {
             id: string;
             email: string;
             name: string;
-            bio?: string;
-            avatar?: string;
+            bio?: string | null;
+            avatar?: string | null;
             [key: string]: any;
         };
     }
